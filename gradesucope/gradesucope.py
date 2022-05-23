@@ -9,14 +9,16 @@ import re
 
 class HappyDiffer(difflib.Differ):
     def _qformat(self, aline, bline, atags, btags):
-        atags = difflib._keep_original_ws(aline, atags).rstrip()
-        btags = difflib._keep_original_ws(bline, btags).rstrip()
+        if hasattr(difflib, "_keep_original_ws"):
+            atags = difflib._keep_original_ws(aline, atags).rstrip()
+            btags = difflib._keep_original_ws(bline, btags).rstrip()
+            pass
 
-        yield "Mine:  " + aline
+        yield "Yours: " + aline
         if atags:
             yield f"       {atags}\n"
 
-        yield "Yours: " + bline
+        yield "Mine:  " + bline
         if btags:
             yield f"       {btags}\n"
 

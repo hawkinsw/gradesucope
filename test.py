@@ -39,10 +39,10 @@ class simple_failing_executable_golden_test_case(ExecutableGoldenTestCase):
     golden_file = "test.golden"
     fail_exe = "fail_test"
 
-    def generate_golden(self):
+    def generate_actual(self):
         return self.execute([], simple_failing_executable_golden_test_case.fail_exe, path=simple_failing_executable_golden_test_case.dir)
 
-    def generate_actual(self):
+    def generate_golden(self):
         return self.read_golden(simple_failing_executable_golden_test_case.golden_file, path=simple_failing_executable_golden_test_case.dir)
 
     @weight(10)
@@ -63,10 +63,10 @@ class simple_passing_executable_golden_test_case(ExecutableGoldenTestCase):
     golden_file = "test.golden"
     success_exe = "success_test"
 
-    def generate_golden(self):
+    def generate_actual(self):
         return self.execute([], simple_passing_executable_golden_test_case.success_exe, path=simple_passing_executable_golden_test_case.dir)
 
-    def generate_actual(self):
+    def generate_golden(self):
         return self.read_golden(simple_passing_executable_golden_test_case.golden_file, path=simple_passing_executable_golden_test_case.dir)
 
     @weight(10)
@@ -86,10 +86,10 @@ class simple_failing_interactive_executable_golden_test_case(InteractiveExecutab
     golden_file = "echo.golden"
     success_exe = "echo_test"
 
-    def generate_golden(self):
+    def generate_actual(self):
         return self.execute([], simple_failing_interactive_executable_golden_test_case.success_exe, ("2", "input2"), path=simple_failing_interactive_executable_golden_test_case.dir)
 
-    def generate_actual(self):
+    def generate_golden(self):
         return self.read_golden(simple_failing_interactive_executable_golden_test_case.golden_file, path=simple_failing_interactive_executable_golden_test_case.dir)
 
     @weight(10)
@@ -111,10 +111,10 @@ class simple_passing_interactive_executable_golden_test_case(InteractiveExecutab
     golden_file = "echo.golden"
     success_exe = "echo_test"
 
-    def generate_golden(self):
+    def generate_actual(self):
         return self.execute([], simple_passing_interactive_executable_golden_test_case.success_exe, ("1", "input2"), path=simple_passing_interactive_executable_golden_test_case.dir)
 
-    def generate_actual(self):
+    def generate_golden(self):
         return self.read_golden(simple_passing_interactive_executable_golden_test_case.golden_file, path=simple_passing_interactive_executable_golden_test_case.dir)
 
     @weight(10)
