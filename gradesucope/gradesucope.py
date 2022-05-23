@@ -123,7 +123,7 @@ class InteractiveExecutableGoldenTestCase(GoldenTestCase):
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
-                               text=True,)
+                               universal_newlines=True,)
         lined_inputs = [ x + "\n" for x in inputs]
         exe.stdin.write("".join(lined_inputs))
         exe.stdin.flush()
