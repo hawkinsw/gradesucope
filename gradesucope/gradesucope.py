@@ -50,8 +50,8 @@ class UCTestCase(unittest.TestCase):
                     f"{str.strip(left)} != {str.strip(right)}: {msg}")
         return string_compare
 
-    def __init__(self, *args):
-        super(UCTestCase, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super(UCTestCase, self).__init__(*args, **kwargs)
         self.addTypeEqualityFunc(
             str, UCTestCase.generate_string_comparison_function(self))
 
