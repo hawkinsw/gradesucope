@@ -3,7 +3,7 @@ import unittest
 from gradescope_utils.autograder_utils.json_test_runner import JSONTestRunner
 from gradescope_utils.autograder_utils.decorators import weight
 
-from gradesucope.gradesucope import ExecutableGoldenTestCase, GoldenTestCase, InteractiveExecutableGoldenTestCase, MandatoryPostProcessor
+from gradesucope.gradesucope import ExecutableGoldenTestCase, GoldenTestCase, InteractiveExecutableGoldenTestCase, MandatoryPostProcessor, FileContentsMatchTestCase
 
 
 def reformatting_post_processor(next):
@@ -129,9 +129,103 @@ def perform_simple_passing_interactive_executable_golden_test_case():
     JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
         MandatoryPostProcessor)).run(suite)
 
+class simple_file_contents_match_test_case(FileContentsMatchTestCase):
+    dir = "test/"
+    match_file = "match_test.txt"
+
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_file_contents_match_test_case."""
+        result = self.count_file_matches(self.match_file, "here: ", self.dir)
+        self.assertTrue(result == 2,
+                        msg="" + str(result) + " matches found but expected 2.")
+
+
+def perform_simple_file_contents_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_file_contents_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+class simple_file_contents_no_match_test_case(FileContentsMatchTestCase):
+    dir = "test/"
+    match_file = "match_test.txt"
+
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_file_contents_no_match_test_case."""
+        result = self.count_file_matches(self.match_file, "there: ", self.dir)
+        self.assertTrue(result == 0,
+                        msg="" + str(result) + " matches found but expected 0.")
+
+def perform_simple_file_contents_no_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_file_contents_no_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+class simple_file_contents_one_match_test_case(FileContentsMatchTestCase):
+    dir = "test/"
+    match_file = "match_test.txt"
+
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_file_contents_one_match_test_case."""
+        result = self.count_file_matches(self.match_file, "one ", self.dir)
+        self.assertTrue(result == 1,
+                        msg="" + str(result) + " matches found but expected 1.")
+
+
+def perform_simple_file_contents_one_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_file_contents_one_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+class simple_file_contents_end_match_test_case(FileContentsMatchTestCase):
+    dir = "test/"
+    match_file = "match_test.txt"
+
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_file_contents_match_test_case."""
+        result = self.count_file_matches(self.match_file, "another\.", self.dir)
+        self.assertTrue(result == 1,
+                        msg="" + str(result) + " matches found but expected 1.")
+
+def perform_simple_file_contents_end_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_file_contents_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+class simple_file_contents_bad_re_match_test_case(FileContentsMatchTestCase):
+    dir = "test/"
+    match_file = "match_test.txt"
+
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_file_contents_bad_re_match_test_case."""
+        result = self.count_file_matches(self.match_file, "(another\.", self.dir)
+        self.assertTrue(result == -1,
+                        msg="" + str(result) + " matches found but expected -1.")
+
+def perform_simple_file_contents_bad_re_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_file_contents_bad_re_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+
+
 if __name__ == '__main__':
     perform_simple_golden_test()
     perform_failing_executable_golden_test()
     perform_passing_executable_golden_test()
     perform_simple_passing_interactive_executable_golden_test_case()
     perform_simple_failing_interactive_executable_golden_test_case()
+    perform_simple_file_contents_match_test_case()
+    perform_simple_file_contents_no_match_test_case()
+    perform_simple_file_contents_one_match_test_case()
+    perform_simple_file_contents_end_match_test_case()
+    perform_simple_file_contents_bad_re_match_test_case()

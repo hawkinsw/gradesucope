@@ -1,5 +1,4 @@
 from sys import stdin
-from gradescope_utils.autograder_utils.decorators import weight, tags, visibility
 import difflib
 import subprocess32 as subprocess
 import os
@@ -49,11 +48,15 @@ class UCTestCase(unittest.TestCase):
         def string_compare(left, right, msg=None):
             if left != right:
                 raise self.failureException(
-                    f"{str.strip(left)} != {str.strip(right)}: {msg}")
+                    f"{msg}\n\n{str.strip(left)} != {str.strip(right)}")
         return string_compare
 
     def __init__(self, *args, **kwargs):
         super(UCTestCase, self).__init__(*args, **kwargs)
+        # By default, suppress any default output from the assertXXX functions
+        # about why the assertion failed and *only* print the text given
+        # by the named parameter `msg`.
+        self.longMessage = False
         self.addTypeEqualityFunc(
             str, UCTestCase.generate_string_comparison_function(self))
 
@@ -67,6 +70,24 @@ class FileExistsTestCase(UCTestCase):
                         "If submitting via GitHub make sure the file is "
                         "in '/labX' where 'X' is the lab number.")
 
+
+class FileContentsMatchTestCase(UCTestCase):
+    def count_file_matches(self, filename, match, path="/autograder/source/"):
+        """ Count how many time match matches the text in filename """
+
+        try:
+            regexp = re.compile(match, re.MULTILINE)
+        except re.error as _:
+            return -1
+
+        successful_open = False
+        file_contents = ""
+        with open(path + "/" + filename, "r") as file:
+            successful_open = True
+            file_contents = file.read()
+        if not successful_open:
+            return -1
+        return len(regexp.findall(file_contents))
 
 class GoldenTestCase(UCTestCase):
     # Helper methods
