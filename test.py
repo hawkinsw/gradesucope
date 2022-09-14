@@ -3,7 +3,7 @@ import unittest
 from gradescope_utils.autograder_utils.json_test_runner import JSONTestRunner
 from gradescope_utils.autograder_utils.decorators import weight
 
-from gradesucope.gradesucope import ExecutableGoldenTestCase, GoldenTestCase, InteractiveExecutableGoldenTestCase, MandatoryPostProcessor, FileContentsMatchTestCase
+from gradesucope.gradesucope import ExecutableGoldenTestCase, GoldenTestCase, InteractiveExecutableGoldenTestCase, MandatoryPostProcessor, FileContentsMatchTestCase, StringContentsMatchTestCase
 
 
 def reformatting_post_processor(next):
@@ -104,7 +104,51 @@ def perform_simple_failing_interactive_executable_golden_test_case():
     JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
         MandatoryPostProcessor)).run(suite)
 
+class simple_failing_extra_character_interactive_executable_golden_test_case(InteractiveExecutableGoldenTestCase):
+    dir = "test/"
+    golden_file = "echo.golden"
+    success_exe = "echo_extra_character_test"
 
+    def generate_actual(self):
+        return self.execute([], simple_failing_extra_character_interactive_executable_golden_test_case.success_exe, ("2", "input2"), path=simple_failing_interactive_executable_golden_test_case.dir)
+
+    def generate_golden(self):
+        return self.read_golden(simple_failing_extra_character_interactive_executable_golden_test_case.golden_file, path=simple_failing_extra_character_interactive_executable_golden_test_case.dir)
+
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_failing_interactive_executable_golden_test_case."""
+        self.student_view()
+
+
+def perform_simple_failing_extra_character_interactive_executable_golden_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_failing_extra_character_interactive_executable_golden_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+class simple_failing_missing_newline_interactive_executable_golden_test_case(InteractiveExecutableGoldenTestCase):
+    dir = "test/"
+    golden_file = "echo.golden"
+    success_exe = "echo_missing_newline_test"
+
+    def generate_actual(self):
+        return self.execute([], simple_failing_missing_newline_interactive_executable_golden_test_case.success_exe, ("2", "input2"), path=simple_failing_interactive_executable_golden_test_case.dir)
+
+    def generate_golden(self):
+        return self.read_golden(simple_failing_missing_newline_interactive_executable_golden_test_case.golden_file, path=simple_failing_missing_newline_interactive_executable_golden_test_case.dir)
+
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_failing_interactive_executable_golden_test_case."""
+        self.student_view()
+
+
+def perform_simple_failing_missing_newline_interactive_executable_golden_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_failing_missing_newline_interactive_executable_golden_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
 
 class simple_passing_interactive_executable_golden_test_case(InteractiveExecutableGoldenTestCase):
     dir = "test/"
@@ -216,7 +260,85 @@ def perform_simple_file_contents_bad_re_match_test_case():
     JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
         MandatoryPostProcessor)).run(suite)
 
+class simple_file_contents_missing_file_test_case(FileContentsMatchTestCase):
+    dir = "test/"
+    match_file = "missing.txt"
 
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_file_contents_missing_file_test_case."""
+        result = self.count_file_matches(self.match_file, "empty on purpose", self.dir)
+        self.assertTrue(result == -1,
+                        msg="" + str(result) + " matches found but expected -1.")
+
+def perform_simple_file_contents_missing_file_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_file_contents_missing_file_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+
+class simple_string_contents_end_match_test_case(StringContentsMatchTestCase):
+    match_contents = "this is the\nend of\nthe road."
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_string_contents_end_match_test_case."""
+        result = self.count_matches(self.match_contents, "road\.$")
+        self.assertTrue(result == 1,
+                        msg="" + str(result) + " matches found but expected 1.")
+
+def perform_simple_string_contents_end_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_string_contents_end_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+class simple_string_contents_start_match_test_case(StringContentsMatchTestCase):
+    match_contents = "this is the\nend of\nthe road."
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_string_contents_start_match_test_case."""
+        result = self.count_matches(self.match_contents, "^this")
+        self.assertTrue(result == 1,
+                        msg="" + str(result) + " matches found but expected 1.")
+
+def perform_simple_string_contents_start_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_string_contents_start_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+class simple_string_contents_eol_match_test_case(StringContentsMatchTestCase):
+    match_contents = """this is the
+    end of
+    the road."""
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_string_contents_eol_match_test_case."""
+        result = self.count_matches(self.match_contents, "of\n")
+        self.assertTrue(result == 1,
+                        msg="" + str(result) + " matches found but expected 1.")
+
+def perform_simple_string_contents_eol_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_string_contents_eol_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
+class simple_string_contents_no_match_test_case(StringContentsMatchTestCase):
+    match_contents = "this is the\nend of\nthe road."
+    @weight(10)
+    def test_me(self):
+        """test_me: simple_string_contents_no_match_test_case."""
+        result = self.count_matches(self.match_contents, "extra")
+        self.assertTrue(result == 0,
+                        msg="" + str(result) + " matches found but expected 0.")
+
+def perform_simple_string_contents_no_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(simple_string_contents_no_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
 
 if __name__ == '__main__':
     perform_simple_golden_test()
@@ -224,8 +346,15 @@ if __name__ == '__main__':
     perform_passing_executable_golden_test()
     perform_simple_passing_interactive_executable_golden_test_case()
     perform_simple_failing_interactive_executable_golden_test_case()
+    perform_simple_failing_extra_character_interactive_executable_golden_test_case()
+    perform_simple_failing_missing_newline_interactive_executable_golden_test_case()
     perform_simple_file_contents_match_test_case()
     perform_simple_file_contents_no_match_test_case()
     perform_simple_file_contents_one_match_test_case()
     perform_simple_file_contents_end_match_test_case()
     perform_simple_file_contents_bad_re_match_test_case()
+    perform_simple_file_contents_missing_file_test_case()
+    perform_simple_string_contents_end_match_test_case()
+    perform_simple_string_contents_start_match_test_case()
+    perform_simple_string_contents_no_match_test_case()
+    perform_simple_string_contents_eol_match_test_case()

@@ -23,12 +23,15 @@ class HappyDiffer(difflib.Differ):
 
     def _dump(self, tag, x, lo, hi):
         if tag == '+':
-            tag = "Yours: "
+            tag = "Mine: "
         elif tag == '-':
-            tag = "Mine:  "
+            tag = "Yours:  "
         elif tag == ' ':
-            tag = "Ours : "
+            tag = "Ours: "
         for i in range(lo, hi):
+            if x[i] == '\n':
+                yield '%s %s' % (tag, "(newline)")
+                continue
             yield '%s %s' % (tag, x[i])
 
 
@@ -71,23 +74,27 @@ class FileExistsTestCase(UCTestCase):
                         "in '/labX' where 'X' is the lab number.")
 
 
-class FileContentsMatchTestCase(UCTestCase):
-    def count_file_matches(self, filename, match, path="/autograder/source/"):
-        """ Count how many time match matches the text in filename """
+class StringContentsMatchTestCase(UCTestCase):
+    def count_matches(self, contents, match):
+        """ Count how many time match matches contents"""
 
         try:
             regexp = re.compile(match, re.MULTILINE)
         except re.error as _:
             return -1
+        return len(regexp.findall(contents))
 
-        successful_open = False
+class FileContentsMatchTestCase(StringContentsMatchTestCase):
+    def count_file_matches(self, filename, match, path="/autograder/source/"):
+        """ Count how many time match matches the text in filename """
         file_contents = ""
-        with open(path + "/" + filename, "r") as file:
-            successful_open = True
-            file_contents = file.read()
-        if not successful_open:
+        try:
+            with open(path + "/" + filename, "r") as file:
+                file_contents = file.read()
+        except IOError as ioe:
             return -1
-        return len(regexp.findall(file_contents))
+        return self.count_matches(file_contents, match)
+
 
 class GoldenTestCase(UCTestCase):
     # Helper methods
@@ -108,8 +115,8 @@ class GoldenTestCase(UCTestCase):
         print("Below is an explanation of how your program's output differs from the\nexpected output.")
         print((":" * 80))
         print("\n".join(HappyDiffer().compare(
-            actual.split("\n"),
-            golden.split("\n"))))
+            [ x + "\n" for x in actual.split("\n")],
+            [ x + "\n" for x in golden.split("\n")])))
 
     # Test Cases
     def student_view(self):
@@ -126,7 +133,7 @@ class GoldenTestCase(UCTestCase):
         raise NotImplementedError()
 
 
-class ExecutableGoldenTestCase(GoldenTestCase):
+class ExecutableTestCase(UCTestCase):
     def execute(self, parameters, exe, path="/autograder/source/build/"):
         args = [path + exe]
         args.extend(parameters)
@@ -137,8 +144,10 @@ class ExecutableGoldenTestCase(GoldenTestCase):
         exe.terminate()
         return output
 
+class ExecutableGoldenTestCase(ExecutableTestCase, GoldenTestCase):
+    pass
 
-class InteractiveExecutableGoldenTestCase(GoldenTestCase):
+class InteractiveExecutableTestCase(UCTestCase):
     def execute(self, parameters, exe, inputs, path="/autograder/source/build/"):
         args = [path + exe]
         args.extend(parameters)
@@ -153,3 +162,6 @@ class InteractiveExecutableGoldenTestCase(GoldenTestCase):
         output = exe.stdout.read()
         exe.terminate()
         return output
+
+class InteractiveExecutableGoldenTestCase(InteractiveExecutableTestCase, GoldenTestCase):
+    pass
