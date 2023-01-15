@@ -165,3 +165,9 @@ class InteractiveExecutableTestCase(UCTestCase):
 
 class InteractiveExecutableGoldenTestCase(InteractiveExecutableTestCase, GoldenTestCase):
     pass
+
+class InteractiveExecutableOutputMatchTestCase(InteractiveExecutableTestCase, StringContentsMatchTestCase):
+    def count_output_matches(self, parameters, exe, inputs, match, path="/autograder/source/"):
+        """ Count how many times match matches the text in the output of _exe_ given input _inputs_. """
+        executable_output = self.execute(parameters, exe, inputs, path)
+        return self.count_matches(executable_output, match)

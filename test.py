@@ -3,7 +3,7 @@ import unittest
 from gradescope_utils.autograder_utils.json_test_runner import JSONTestRunner
 from gradescope_utils.autograder_utils.decorators import weight
 
-from gradesucope.gradesucope import ExecutableGoldenTestCase, GoldenTestCase, InteractiveExecutableGoldenTestCase, MandatoryPostProcessor, FileContentsMatchTestCase, StringContentsMatchTestCase
+from gradesucope.gradesucope import InteractiveExecutableOutputMatchTestCase, ExecutableGoldenTestCase, GoldenTestCase, InteractiveExecutableGoldenTestCase, MandatoryPostProcessor, FileContentsMatchTestCase, StringContentsMatchTestCase
 
 
 def reformatting_post_processor(next):
@@ -365,11 +365,43 @@ class simple_string_contents_no_match_test_case(StringContentsMatchTestCase):
         self.assertTrue(result == 0,
                         msg="" + str(result) + " matches found but expected 0.")
 
+
 def perform_simple_string_contents_no_match_test_case():
     suite = unittest.TestSuite()
     suite.addTest(simple_string_contents_no_match_test_case("test_me"))
     JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
         MandatoryPostProcessor)).run(suite)
+
+
+class interactive_executable_output_match_test_case(InteractiveExecutableOutputMatchTestCase):
+    dir = "test/"
+    executable_name = "multiline_output"
+
+    @weight(10)
+    def test_me(self):
+        """test_me: interactive_executable_output_match_test_case."""
+        matches = self.count_output_matches([], interactive_executable_output_match_test_case.executable_name, (
+        ), "^This: $", interactive_executable_output_match_test_case.dir)
+        self.assertTrue(matches == 1,
+                        msg="" + str(matches) + " matches found but expected 1.")
+
+        matches = self.count_output_matches([], interactive_executable_output_match_test_case.executable_name, (
+        ), "^Is: Not$", interactive_executable_output_match_test_case.dir)
+        self.assertTrue(matches == 1,
+                        msg="" + str(matches) + " matches found but expected 1.")
+
+        matches = self.count_output_matches([], interactive_executable_output_match_test_case.executable_name, (
+        ), "^Is:$", interactive_executable_output_match_test_case.dir)
+        self.assertTrue(matches == 0,
+                        msg="" + str(matches) + " matches found but expected 1.")
+
+
+def perform_interactive_executable_output_match_test_case():
+    suite = unittest.TestSuite()
+    suite.addTest(interactive_executable_output_match_test_case("test_me"))
+    JSONTestRunner(verbosity=1, post_processor=reformatting_post_processor(
+        MandatoryPostProcessor)).run(suite)
+
 
 if __name__ == '__main__':
     perform_simple_golden_test()
@@ -389,3 +421,4 @@ if __name__ == '__main__':
     perform_simple_string_contents_start_match_test_case()
     perform_simple_string_contents_no_match_test_case()
     perform_simple_string_contents_eol_match_test_case()
+    perform_interactive_executable_output_match_test_case()
